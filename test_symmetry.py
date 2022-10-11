@@ -5,6 +5,9 @@ from decimal import Decimal
 class TestSymmetry(unittest.TestCase):
     
     input_examples = {
+        'empty': [],
+        'one_point': [(-4,-1)],
+        'two_points': [(10.0,4.0), (2.0, 8.0)],
         'square': [(0.0, 0.0), (2.0, 0.0), (2.0, 2.0), (0.0, 2.0)], # 4
         'rectangle': [(-2,2), (-2,4), (2,4), (2,2)], # 2
         'rhombus': [(2,-3), (6,5), (-2,1), (-6,-7)], # 2
@@ -18,13 +21,16 @@ class TestSymmetry(unittest.TestCase):
     }
     
     def test_symmetry(self):
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['square']),{(Decimal('0.00000'), Decimal('1.00000')): [Decimal('0.00000'), Decimal('-1.00000'), Decimal('1.00000')],(Decimal('1.00000'), Decimal('2.00000')): [Decimal('-1.00000'),Decimal('0.00000'),Decimal('1.00000')],(Decimal('0.00000'), Decimal('0.00000')): [Decimal('1.00000'),Decimal('-1.00000'),Decimal('0.00000')],(Decimal('2.00000'), Decimal('0.00000')): [Decimal('1.00000'),Decimal('1.00000'),Decimal('-2.00000')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['rectangle']),{(Decimal('0.00000'), Decimal('4.00000')): [Decimal('-1.00000'), Decimal('0.00000'), Decimal('0.00000')], (Decimal('2.00000'), Decimal('3.00000')): [Decimal('0.00000'), Decimal('2.00000'), Decimal('-6.00000')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['rhombus']),{(Decimal('6.00000'), Decimal('5.00000')): [Decimal('-6.00000'), Decimal('6.00000'), Decimal('6.00000')], (Decimal('2.00000'), Decimal('-3.00000')): [Decimal('2.00000'), Decimal('2.00000'), Decimal('2.00000')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['kite']),{(Decimal('-4.00000'), Decimal('-1.00000')): [Decimal('0.00000'), Decimal('-5.25000'), Decimal('-5.25000')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['isosceles_trapezoid']),{(Decimal('1.00000'), Decimal('1.00000')): [Decimal('-0.75000'), Decimal('0.75000'), Decimal('0.00000')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['trapezoid']),{}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['parallelogram']),{}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['equilateral_triangle']),{(Decimal('-1.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('-1.00000'), Decimal('0.57735')], (Decimal('0.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('0.00000'), Decimal('0.00000')], (Decimal('1.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('1.00000'), Decimal('-0.57735')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['isosceles_triangle']),{(Decimal('7.00000'), Decimal('5.00000')): [Decimal('-5.66667'), Decimal('5.66667'), Decimal('11.33334')]}),
-        self.assertAlmostEqual(find_symmetric_lines(input_examples['butterfly']),{(Decimal('15.00000'), Decimal('21.00000')): [Decimal('-5.29412'), Decimal('0.00000'), Decimal('79.41180')]})
+        self.assertEqual(find_symmetric_lines(input_examples['empty']),0),
+        self.assertEqual(find_symmetric_lines(input_examples['one_point']),1),
+        self.assertEqual(find_symmetric_lines(input_examples['two_points']),{(Decimal('3.00000'), Decimal('6.00000')): [Decimal('-1.00000'), Decimal('-2.00000'), Decimal('15.0000000000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['square']),{(Decimal('0.00000'), Decimal('1.00000')): [Decimal('0.00000'), Decimal('-1.00000'), Decimal('1.00000')],(Decimal('1.00000'), Decimal('2.00000')): [Decimal('-1.00000'),Decimal('0.00000'),Decimal('1.00000')],(Decimal('0.00000'), Decimal('0.00000')): [Decimal('1.00000'),Decimal('-1.00000'),Decimal('0.00000')],(Decimal('2.00000'), Decimal('0.00000')): [Decimal('1.00000'),Decimal('1.00000'),Decimal('-2.00000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['rectangle']),{(Decimal('0.00000'), Decimal('4.00000')): [Decimal('-1.00000'), Decimal('0.00000'), Decimal('0.00000')], (Decimal('2.00000'), Decimal('3.00000')): [Decimal('0.00000'), Decimal('2.00000'), Decimal('-6.00000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['rhombus']),{(Decimal('6.00000'), Decimal('5.00000')): [Decimal('-6.00000'), Decimal('6.00000'), Decimal('6.00000')], (Decimal('2.00000'), Decimal('-3.00000')): [Decimal('2.00000'), Decimal('2.00000'), Decimal('2.00000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['kite']),{(Decimal('-4.00000'), Decimal('-1.00000')): [Decimal('0.00000'), Decimal('-5.25000'), Decimal('-5.25000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['isosceles_trapezoid']),{(Decimal('1.00000'), Decimal('1.00000')): [Decimal('-0.75000'), Decimal('0.75000'), Decimal('0.00000')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['trapezoid']),{}),
+        self.assertEqual(find_symmetric_lines(input_examples['parallelogram']),{}),
+        self.assertEqual(find_symmetric_lines(input_examples['equilateral_triangle']),{(Decimal('-1.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('-1.00000'), Decimal('0.57735')], (Decimal('0.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('0.00000'), Decimal('0.00000')], (Decimal('1.00000'), Decimal('0.00000')): [Decimal('0.57735'), Decimal('1.00000'), Decimal('-0.57735')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['isosceles_triangle']),{(Decimal('7.00000'), Decimal('5.00000')): [Decimal('-5.66667'), Decimal('5.66667'), Decimal('11.33334')]}),
+        self.assertEqual(find_symmetric_lines(input_examples['butterfly']),{(Decimal('15.00000'), Decimal('21.00000')): [Decimal('-5.29412'), Decimal('0.00000'), Decimal('79.41180')]})

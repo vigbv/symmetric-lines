@@ -1,3 +1,4 @@
+from math import gcd # to calculate greatest common divisor
 from decimal import Decimal as D # use decimal for accurate calculations
 round_digits = D(10) ** -5 # use precision 5 to round the decimals
 
@@ -14,6 +15,23 @@ def calculate_linear_equation(p: set, q: set) -> tuple:
     c = D((x1 * y2) - (x2 * y1)).quantize(round_digits)
     
     return a, b, c
+
+def calculate_perpendicular_bisector(x: set, a: float, b: float, c: float) -> list:
+    """Returns linear equation for a given point (coordinates) and linear equation
+       - used to calculate perpendicular bisector when only 2 points are provided
+    """
+    
+    a_perp = b
+    b_perp = -a
+    c_perp = -((a_perp*x[0])+(b_perp*x[1]))
+    
+    if a_perp%1 == 0 and b_perp%1 == 0 and c_perp%1 == 0:
+        gcd_perp = gcd(int(a_perp),int(b_perp),int(c_perp))
+        a_perp = a_perp/gcd_perp
+        b_perp = b_perp/gcd_perp
+        c_perp = c_perp/gcd_perp
+    
+    return [a_perp, b_perp, c_perp]
 
 def find_midpoints(input: list) -> set:
     """Returns midpoints between all points for a given set of coordinates
@@ -55,59 +73,75 @@ def find_reflection_point(x: set, a: float, b: float, c: float) -> set:
 def find_symmetric_lines(input: list) -> dict:
     """Checks if there are lines of symmetry for a given set of points (coordinates) and returns the coordinates for symmetric lines
     """
-    
     master_slope = set()
     symmetric_lines = {}
+    len_input = len(input)
     
-    input_set = set()
-    
-    for point in input: # convert input points to decimal
-        input_set.add((D(point[0]).quantize(round_digits), D(point[1]).quantize(round_digits)))
-                
-    centroid = tuple(D(x / len(input)).quantize(round_digits) for x in map(sum, zip(*input))) # calculate centroid for all points, all symmetric lines pass through centroid
+    if len_input == 0:
+        return 0
+    elif len_input == 1:
+        return 1
+    elif len_input == 2: # calculate linear equation for perpendicular bisector
+        a, b, c = calculate_linear_equation(input[0], input[1])
 
-    mid_points = find_midpoints(input) # find all midpoints
+        centroid = tuple(D(x / len(input)).quantize(round_digits) for x in map(sum, zip(*input)))
 
-    all_points = set() # merge input points and midpoints
-    all_points = input_set
-    all_points.update(mid_points)
-    
-    for point in all_points: # loop through all the points to find symmetryic lines
-    
-        is_symmetric = 0
+        symmetric_lines[centroid] = calculate_perpendicular_bisector(centroid, a, b, c)
         
-        if point != centroid:
-            
-            a, b, c = calculate_linear_equation(point, centroid) # ax+by+c
-            
-            if b != 0: # skip vertical lines as they have Inf slope 
-                slope = -a/b
-            else:
-                slope = "vertical"
+        return symmetric_lines
+    else:      
+        input_set = set()
+        
+        for point in input: # convert input points to decimal
+            input_set.add((D(point[0]).quantize(round_digits), D(point[1]).quantize(round_digits)))
+                
+        centroid = tuple(D(x / len(input)).quantize(round_digits) for x in map(sum, zip(*input))) # calculate centroid for all points, all symmetric lines pass through centroid
 
-            if slope in master_slope: # check master slope set to ignore duplicate points on same line  
-                continue
+        mid_points = find_midpoints(input) # find all midpoints
+
+        all_points = set() # merge input points and midpoints
+        all_points = input_set.copy()
+        all_points.update(mid_points)
+                
+        for point in all_points: # loop through all the points to find symmetryic lines
             
-            master_slope.add(slope) 
+            is_symmetric = 0
             
-            for input_point in input:    
-                if input_point != point:
-                    reflection_point = find_reflection_point(input_point, a, b, c)
-                                    
-                    if reflection_point not in input_set:
-                        is_symmetric = 0
-                        break
-                    else:
-                        is_symmetric = 1
-            
-            if is_symmetric:
-                symmetric_lines[point] = [a,b,c]
-            
-    return symmetric_lines
+            if point != centroid:
+                
+                a, b, c = calculate_linear_equation(point, centroid) # ax+by+c
+                
+                if b != 0: # skip vertical lines as they have Inf slope 
+                    slope = -a/b
+                else:
+                    slope = "vertical"
+
+                if slope in master_slope: # check master slope set to ignore duplicate points on same line  
+                    continue
+                
+                master_slope.add(slope) 
+                
+                for input_point in input:    
+                    if input_point != point:
+                        reflection_point = find_reflection_point(input_point, a, b, c)
+                                        
+                        if reflection_point not in input_set:
+                            is_symmetric = 0
+                            break
+                        else:
+                            is_symmetric = 1
+                
+                if is_symmetric:
+                    symmetric_lines[point] = [a,b,c]
+                
+        return symmetric_lines
     
 
 # example inputs
 input_examples = {
+    'empty': [], # none
+    'one_point': [(-4,-1)], # inf
+    'two_points': [(2.0, 4.0), (4.0, 8.0)], # 1
     'square': [(0.0, 0.0), (2.0, 0.0), (2.0, 2.0), (0.0, 2.0)], # 4
     'rectangle': [(-2,2), (-2,4), (2,4), (2,2)], # 2
     'rhombus': [(2,-3), (6,5), (-2,1), (-6,-7)], # 2
@@ -121,12 +155,16 @@ input_examples = {
 }
 
 if __name__ == '__main__':
-    symmetric_lines = find_symmetric_lines(input_examples['rectangle'])
-                        
-    print("Total number of symmetric lines: " + str(len(symmetric_lines))) 
-
-    i = 1
-    for point, coord in  symmetric_lines.items():
-        a, b, c = round(float(coord[0]), 2), round(float(coord[1]), 2), round(float(coord[2]), 2)
-        print(f'Linear equation for symmetric line {i}: {a}x{b:+}y{c:+} = 0')
-        i += 1
+    symmetric_lines = find_symmetric_lines(input_examples['trapezoid'])
+    print(symmetric_lines)
+    if symmetric_lines == 0:
+        print("Input empty, please provide an input.")    
+    elif symmetric_lines == 1:
+        print("Only one input point provided, there are infinite possible symmetric lines.")  
+    else:      
+        print("Total number of symmetric lines: " + str(len(symmetric_lines))) 
+        i = 1
+        for point, coord in  symmetric_lines.items():
+            a, b, c = round(float(coord[0]), 2), round(float(coord[1]), 2), round(float(coord[2]), 2)
+            print(f'Linear equation for symmetric line {i}: {a}x{b:+}y{c:+} = 0')
+            i += 1
